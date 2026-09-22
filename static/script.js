@@ -103,7 +103,7 @@ function loadHistory() {
     return savedHistory
       .filter((item) => (
         item
-        && typeof item.expression === "string"
+        && typeof item.expression === "string" && item.expression.trim().length > 0
         && typeof item.result === "number"
         && Number.isFinite(item.result)
       ))
@@ -114,8 +114,12 @@ function loadHistory() {
 }
 
 function saveHistory() {
-  if (typeof localStorage !== "undefined") {
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    }
+  } catch {
+    // Keep history usable for this session when storage is unavailable.
   }
 }
 
