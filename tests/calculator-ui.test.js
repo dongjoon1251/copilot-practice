@@ -158,7 +158,7 @@ test("grouped expressions can mix keypad and keyboard input", async () => {
   calculator.pressKey("7");
   calculator.pressKey("+");
   calculator.pressKey("8");
-  calculator.clickValue(")");
+  calculator.pressKey(")");
   calculator.clickValue("/");
   calculator.pressKey("3");
   assert.equal(calculator.pressKey("Enter"), true);
