@@ -3,6 +3,7 @@ const resultEl = document.getElementById("result");
 
 let expression = "";
 let lastResult = null;
+let memory = 0;
 
 function render() {
   expressionEl.textContent = expression;
@@ -16,6 +17,7 @@ function showError(message) {
 
 function appendValue(value) {
   expression += value;
+  lastResult = null;
   resultEl.textContent = expression || "0";
   render();
 }
@@ -29,8 +31,32 @@ function clearAll() {
 
 function backspace() {
   expression = expression.slice(0, -1);
+  lastResult = null;
   resultEl.textContent = expression || "0";
   render();
+}
+
+function clearMemory() {
+  memory = 0;
+}
+
+function recallMemory() {
+  const memoryValue = formatResult(memory);
+  const needsMultiplication = expression && /[0-9)]$/.test(expression);
+  const recalledValue = memory < 0 && expression
+    ? `(${memoryValue})`
+    : memoryValue;
+  expression += needsMultiplication ? `*${recalledValue}` : recalledValue;
+  lastResult = null;
+  resultEl.textContent = expression;
+  render();
+}
+
+function updateMemory(operation) {
+  if (lastResult === null) {
+    return;
+  }
+  memory = operation(memory, lastResult);
 }
 
 async function evaluateExpression() {
@@ -73,6 +99,14 @@ document.querySelectorAll(".key").forEach((button) => {
       backspace();
     } else if (action === "equals") {
       evaluateExpression();
+    } else if (action === "memory-clear") {
+      clearMemory();
+    } else if (action === "memory-recall") {
+      recallMemory();
+    } else if (action === "memory-add") {
+      updateMemory((currentMemory, result) => currentMemory + result);
+    } else if (action === "memory-subtract") {
+      updateMemory((currentMemory, result) => currentMemory - result);
     } else if (value !== undefined) {
       appendValue(value);
     }
