@@ -42,7 +42,11 @@ function clearMemory() {
 
 function recallMemory() {
   const memoryValue = formatResult(memory);
-  expression += memory < 0 && expression ? `(${memoryValue})` : memoryValue;
+  const needsMultiplication = expression && /[0-9)]$/.test(expression);
+  const recalledValue = memory < 0 && expression
+    ? `(${memoryValue})`
+    : memoryValue;
+  expression += needsMultiplication ? `*${recalledValue}` : recalledValue;
   lastResult = null;
   resultEl.textContent = expression;
   render();

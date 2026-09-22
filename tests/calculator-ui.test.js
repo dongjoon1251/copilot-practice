@@ -76,7 +76,7 @@ async function settle() {
 }
 
 test("M+, M-, MR, and MC preserve a valid memory value", async () => {
-  const calculator = createCalculator([{ result: 5 }, { result: 2 }]);
+  const calculator = createCalculator([{ result: 5 }, { result: 8 }]);
 
   calculator.clickValue("2");
   calculator.clickValue("+");
@@ -94,7 +94,12 @@ test("M+, M-, MR, and MC preserve a valid memory value", async () => {
   calculator.click("memory-subtract");
   calculator.click("clear");
   calculator.click("memory-recall");
-  assert.equal(calculator.result.textContent, "3");
+  assert.equal(calculator.result.textContent, "-3");
+
+  calculator.click("clear");
+  calculator.clickValue("2");
+  calculator.click("memory-recall");
+  assert.equal(calculator.result.textContent, "2*(-3)");
 
   calculator.click("memory-clear");
   calculator.click("clear");
