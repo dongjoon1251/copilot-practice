@@ -18,6 +18,8 @@ function createCalculator(responses) {
     },
     textContent: "0",
   };
+  let keydownHandler = () => {};
+  const requests = [];
   const buttons = [
     "memory-clear",
     "memory-recall",
@@ -31,7 +33,7 @@ function createCalculator(responses) {
       this.click = handler;
     },
   }));
-  ["0", "2", "3", "4", "5", "7", "8", "+", "-", "/"].forEach((value) => {
+  ["(", ")", "0", "2", "3", "4", "5", "7", "8", "+", "-", "/"].forEach((value) => {
     buttons.push({
       dataset: { value },
       addEventListener(_, handler) {
@@ -48,9 +50,14 @@ function createCalculator(responses) {
       querySelectorAll() {
         return buttons;
       },
-      addEventListener() {},
+      addEventListener(eventName, handler) {
+        if (eventName === "keydown") {
+          keydownHandler = handler;
+        }
+      },
     },
-    fetch: async () => {
+    fetch: async (_, options) => {
+      requests.push(JSON.parse(options.body));
       const response = responses.shift();
       return {
         ok: response.ok ?? true,
@@ -68,6 +75,17 @@ function createCalculator(responses) {
     clickValue(value) {
       buttons.find((button) => button.dataset.value === value).click();
     },
+    pressKey(key) {
+      let defaultPrevented = false;
+      keydownHandler({
+        key,
+        preventDefault() {
+          defaultPrevented = true;
+        },
+      });
+      return defaultPrevented;
+    },
+    requests,
   };
 }
 
@@ -131,4 +149,22 @@ test("memory does not change after an invalid expression", async () => {
   calculator.click("memory-recall");
 
   assert.equal(calculator.result.textContent, "7");
+});
+
+test("grouped expressions can mix keypad and keyboard input", async () => {
+  const calculator = createCalculator([{ result: 5 }]);
+
+  calculator.clickValue("(");
+  calculator.pressKey("7");
+  calculator.pressKey("+");
+  calculator.pressKey("8");
+  calculator.pressKey(")");
+  calculator.clickValue("/");
+  calculator.pressKey("3");
+  assert.equal(calculator.pressKey("Enter"), true);
+  await settle();
+
+  assert.deepEqual(calculator.requests, [{ expression: "(7+8)/3" }]);
+  assert.equal(calculator.expression.textContent, "(7+8)/3 =");
+  assert.equal(calculator.result.textContent, "5");
 });
