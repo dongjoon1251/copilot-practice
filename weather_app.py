@@ -11,16 +11,44 @@ before running this app, e.g.:
 """
 
 import os
+import logging
+import time
 
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, g, jsonify, render_template, request
 
 app = Flask(__name__)
+logger = logging.getLogger("weather.requests")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logger.addHandler(handler)
+logger.propagate = False
 
 OPENWEATHER_API_KEY = os.environ.get("OPENWEATHER_API_KEY")
 OPENWEATHER_URL = "https://api.openweathermap.org/data/2.5/weather"
 ICON_URL_TEMPLATE = "https://openweathermap.org/img/wn/{icon}@2x.png"
 REQUEST_TIMEOUT_SECONDS = 5
+
+
+@app.before_request
+def start_request_timer() -> None:
+    g.request_started_at = time.perf_counter()
+
+
+@app.after_request
+def log_request(response):
+    """Log request metadata without recording query strings, form data, or headers."""
+    latency_ms = (time.perf_counter() - g.request_started_at) * 1000
+    logger.info(
+        "request method=%s path=%s status=%s latency_ms=%.2f",
+        request.method,
+        request.path,
+        response.status_code,
+        latency_ms,
+    )
+    return response
 
 
 def fetch_weather(city: str) -> dict:
@@ -75,6 +103,11 @@ def fetch_weather(city: str) -> dict:
         return {"error": "Unexpected response from the weather service. Please try again."}
 
     return {"weather": weather}
+
+
+@app.get("/health")
+def health():
+    return jsonify(status="ok")
 
 
 @app.route("/", methods=["GET", "POST"])

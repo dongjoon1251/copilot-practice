@@ -5,22 +5,51 @@ at /api/calc that safely evaluates arithmetic expressions.
 """
 
 import ast
+import logging
 import math
 import operator
+import time
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 BASE_DIR = Path(__file__).resolve().parent
 STATIC_DIR = BASE_DIR / "static"
+logger = logging.getLogger("calculator.requests")
+logger.setLevel(logging.INFO)
+if not logger.handlers:
+    handler = logging.StreamHandler()
+    handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
+    logger.addHandler(handler)
+logger.propagate = False
 
 app = FastAPI(title="Calculator API")
 
 # Serve CSS/JS assets under /static, keep index.html served at "/".
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+@app.middleware("http")
+async def log_request(request: Request, call_next):
+    """Log request metadata without recording query strings or request bodies."""
+    started_at = time.perf_counter()
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    finally:
+        latency_ms = (time.perf_counter() - started_at) * 1000
+        logger.info(
+            "request method=%s path=%s status=%s latency_ms=%.2f",
+            request.method,
+            request.url.path,
+            status_code,
+            latency_ms,
+        )
 
 
 class CalcRequest(BaseModel):
@@ -86,6 +115,11 @@ def safe_eval(expression: str) -> float:
 @app.get("/")
 def read_index() -> FileResponse:
     return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/health")
+def health() -> dict[str, str]:
+    return {"status": "ok"}
 
 
 @app.post("/api/calc", response_model=CalcResponses)
