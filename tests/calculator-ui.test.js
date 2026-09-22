@@ -11,6 +11,8 @@ const script = fs.readFileSync(
 
 function createCalculator(responses) {
   const expression = { classList: { remove() {} }, textContent: "" };
+  let keydownHandler;
+  let request;
   const result = {
     classList: {
       add() {},
@@ -31,7 +33,7 @@ function createCalculator(responses) {
       this.click = handler;
     },
   }));
-  ["0", "2", "3", "4", "5", "7", "8", "+", "-", "/"].forEach((value) => {
+  ["(", ")", "0", "2", "3", "4", "5", "7", "8", "+", "-", "*", "/"].forEach((value) => {
     buttons.push({
       dataset: { value },
       addEventListener(_, handler) {
@@ -48,9 +50,14 @@ function createCalculator(responses) {
       querySelectorAll() {
         return buttons;
       },
-      addEventListener() {},
+      addEventListener(event, handler) {
+        if (event === "keydown") {
+          keydownHandler = handler;
+        }
+      },
     },
-    fetch: async () => {
+    fetch: async (_, options) => {
+      request = options;
       const response = responses.shift();
       return {
         ok: response.ok ?? true,
@@ -67,6 +74,12 @@ function createCalculator(responses) {
     },
     clickValue(value) {
       buttons.find((button) => button.dataset.value === value).click();
+    },
+    pressKey(key) {
+      keydownHandler({ key, preventDefault() {} });
+    },
+    getRequest() {
+      return request;
     },
   };
 }
@@ -131,4 +144,24 @@ test("memory does not change after an invalid expression", async () => {
   calculator.click("memory-recall");
 
   assert.equal(calculator.result.textContent, "7");
+});
+
+test("parentheses keys and keyboard input preserve grouped expressions", async () => {
+  const calculator = createCalculator([{ result: 20 }]);
+
+  calculator.clickValue("(");
+  calculator.clickValue("2");
+  calculator.pressKey("+");
+  calculator.clickValue("3");
+  calculator.pressKey(")");
+  calculator.clickValue("*");
+  calculator.clickValue("4");
+  calculator.click("equals");
+  await settle();
+
+  assert.deepEqual(
+    JSON.parse(calculator.getRequest().body),
+    { expression: "(2+3)*4" },
+  );
+  assert.equal(calculator.result.textContent, "20");
 });
