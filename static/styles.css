@@ -117,7 +117,7 @@ body {
 }
 
 .key-equals {
-  grid-column: span 2;
+  grid-column: 1 / -1;
   background: var(--accent);
 }
 
