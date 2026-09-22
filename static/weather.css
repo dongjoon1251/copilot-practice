@@ -1,0 +1,134 @@
+:root {
+  color-scheme: dark;
+  --bg-start: #1e3a5f;
+  --bg-end: #0f172a;
+  --panel: #111827ee;
+  --accent: #38bdf8;
+  --accent-hover: #7dd3fc;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --error: #f87171;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+  color: var(--text);
+}
+
+.weather-app {
+  width: min(360px, 92vw);
+  padding: 28px;
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+  text-align: center;
+}
+
+h1 {
+  margin: 0 0 20px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.search-form {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.search-form input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: none;
+  background: #00000033;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.search-form input::placeholder {
+  color: var(--muted);
+}
+
+.search-form button {
+  padding: 12px 18px;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: #0f172a;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.search-form button:hover {
+  background: var(--accent-hover);
+}
+
+.error {
+  color: var(--error);
+  font-size: 14px;
+  margin: 0 0 8px;
+}
+
+.weather-card {
+  padding: 16px 0 4px;
+}
+
+.weather-location {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.weather-icon {
+  width: 100px;
+  height: 100px;
+}
+
+.weather-temp {
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.weather-description {
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+
+.weather-details {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid #ffffff1a;
+  padding-top: 16px;
+}
+
+.weather-details > div {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.weather-details .label {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.weather-details .value {
+  font-size: 15px;
+  font-weight: 600;
+}

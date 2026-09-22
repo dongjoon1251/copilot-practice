@@ -1,0 +1,121 @@
+:root {
+  color-scheme: dark;
+  --bg-start: #1f2937;
+  --bg-end: #0f172a;
+  --panel: #111827ee;
+  --accent: #6366f1;
+  --accent-hover: #818cf8;
+  --key-bg: #1f2937;
+  --key-hover: #374151;
+  --key-text: #f9fafb;
+  --error: #f87171;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
+}
+
+.calculator {
+  width: min(360px, 92vw);
+  padding: 20px;
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+.display {
+  padding: 20px 16px;
+  min-height: 96px;
+  border-radius: 16px;
+  background: #00000033;
+  text-align: right;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.expression {
+  min-height: 22px;
+  font-size: 16px;
+  color: #9ca3af;
+  word-break: break-all;
+}
+
+.result {
+  font-size: 40px;
+  font-weight: 600;
+  color: var(--key-text);
+  word-break: break-all;
+}
+
+.result.error {
+  color: var(--error);
+  font-size: 24px;
+}
+
+.keypad {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.key {
+  border: none;
+  border-radius: 14px;
+  padding: 18px 0;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--key-text);
+  background: var(--key-bg);
+  cursor: pointer;
+  transition: transform 0.05s ease, background 0.15s ease;
+}
+
+.key:hover {
+  background: var(--key-hover);
+}
+
+.key:active {
+  transform: scale(0.95);
+}
+
+.key-op {
+  background: #312e81;
+  color: #c7d2fe;
+}
+
+.key-op:hover {
+  background: #3730a3;
+}
+
+.key-clear {
+  background: #7f1d1d55;
+  color: #fecaca;
+}
+
+.key-clear:hover {
+  background: #7f1d1d99;
+}
+
+.key-equals {
+  grid-column: span 2;
+  background: var(--accent);
+}
+
+.key-equals:hover {
+  background: var(--accent-hover);
+}
+
+.key-zero {
+  grid-column: span 1;
+}
