@@ -15,7 +15,29 @@ function showError(message) {
   resultEl.classList.add("error");
 }
 
+function appendDecimalPoint() {
+  const currentNumber = expression.split(/[+\-*/%]/).pop();
+  if (currentNumber.includes(".")) {
+    return;
+  }
+
+  if (!currentNumber || /[+\-*/%]$/.test(expression)) {
+    expression += "0.";
+  } else {
+    expression += ".";
+  }
+
+  lastResult = null;
+  resultEl.textContent = expression || "0";
+  render();
+}
+
 function appendValue(value) {
+  if (value === ".") {
+    appendDecimalPoint();
+    return;
+  }
+
   expression += value;
   lastResult = null;
   resultEl.textContent = expression || "0";
