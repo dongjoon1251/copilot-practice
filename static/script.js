@@ -115,7 +115,7 @@ document.querySelectorAll(".key").forEach((button) => {
 
 document.addEventListener("keydown", (event) => {
   const { key } = event;
-  if (/^[0-9.+\-*/%]$/.test(key)) {
+  if (/^[0-9.+\-*/%()]$/.test(key)) {
     appendValue(key);
   } else if (key === "Enter" || key === "=") {
     event.preventDefault();
