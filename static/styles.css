@@ -25,13 +25,105 @@ body {
   background: radial-gradient(circle at top, var(--bg-start), var(--bg-end));
 }
 
+.calculator-layout {
+  width: min(760px, 92vw);
+  display: grid;
+  grid-template-columns: minmax(0, 360px) minmax(220px, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
 .calculator {
-  width: min(360px, 92vw);
   padding: 20px;
   border-radius: 24px;
   background: var(--panel);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
   backdrop-filter: blur(10px);
+}
+
+.history-panel {
+  min-height: 240px;
+  max-height: 548px;
+  padding: 20px;
+  border-radius: 24px;
+  color: var(--key-text);
+  background: var(--panel);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px);
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.history-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.clear-history {
+  border: none;
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: #fecaca;
+  background: #7f1d1d55;
+  cursor: pointer;
+}
+
+.clear-history:hover:not(:disabled) {
+  background: #7f1d1d99;
+}
+
+.clear-history:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.history-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.history-entry {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border: none;
+  border-radius: 10px;
+  color: var(--key-text);
+  background: var(--key-bg);
+  cursor: pointer;
+  text-align: left;
+}
+
+.history-entry:hover {
+  background: var(--key-hover);
+}
+
+.history-expression,
+.history-result {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.history-expression {
+  color: #9ca3af;
+}
+
+.history-result {
+  font-size: 18px;
+  font-weight: 600;
 }
 
 .display {
@@ -127,4 +219,20 @@ body {
 
 .key-zero {
   grid-column: span 1;
+}
+
+@media (max-width: 640px) {
+  body {
+    align-items: flex-start;
+    padding: 16px 0;
+  }
+
+  .calculator-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .history-panel {
+    min-height: 0;
+    max-height: 280px;
+  }
 }

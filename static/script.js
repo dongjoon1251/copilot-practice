@@ -1,9 +1,14 @@
 const expressionEl = document.getElementById("expression");
 const resultEl = document.getElementById("result");
+const historyListEl = document.getElementById("history-list");
+const clearHistoryButton = document.getElementById("clear-history");
+const HISTORY_STORAGE_KEY = "calculator-history";
+const MAX_HISTORY_ITEMS = 20;
 
 let expression = "";
 let lastResult = null;
 let memory = 0;
+let history = loadHistory();
 
 function render() {
   expressionEl.textContent = expression;
@@ -63,24 +68,99 @@ async function evaluateExpression() {
   if (!expression.trim()) {
     return;
   }
+  const evaluatedExpression = expression;
   try {
     const response = await fetch("/api/calc", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ expression }),
+      body: JSON.stringify({ expression: evaluatedExpression }),
     });
     const data = await response.json();
     if (!response.ok) {
       throw new Error(data.detail || "Invalid expression");
     }
     lastResult = data.result;
-    expressionEl.textContent = expression + " =";
+    addHistoryItem(evaluatedExpression, data.result);
+    expressionEl.textContent = evaluatedExpression + " =";
     resultEl.textContent = formatResult(data.result);
     resultEl.classList.remove("error");
     expression = String(data.result);
   } catch (err) {
     showError(err.message || "Error");
   }
+}
+
+function loadHistory() {
+  if (typeof localStorage === "undefined") {
+    return [];
+  }
+
+  try {
+    const savedHistory = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || "[]");
+    if (!Array.isArray(savedHistory)) {
+      return [];
+    }
+    return savedHistory
+      .filter((item) => (
+        item
+        && typeof item.expression === "string" && item.expression.trim().length > 0
+        && typeof item.result === "number"
+        && Number.isFinite(item.result)
+      ))
+      .slice(0, MAX_HISTORY_ITEMS);
+  } catch (error) {
+    return [];
+  }
+}
+
+function saveHistory() {
+  try {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(history));
+    }
+  } catch {
+    // Keep history usable for this session when storage is unavailable.
+  }
+}
+
+function addHistoryItem(evaluatedExpression, value) {
+  history.unshift({ expression: evaluatedExpression, result: value });
+  history = history.slice(0, MAX_HISTORY_ITEMS);
+  saveHistory();
+  renderHistory();
+}
+
+function renderHistory() {
+  historyListEl.replaceChildren();
+  history.forEach((item) => {
+    const historyItem = document.createElement("li");
+    const restoreButton = document.createElement("button");
+    const savedExpression = document.createElement("span");
+    const savedResult = document.createElement("span");
+
+    restoreButton.type = "button";
+    restoreButton.className = "history-entry";
+    restoreButton.addEventListener("click", () => {
+      expression = item.expression;
+      lastResult = null;
+      resultEl.textContent = expression;
+      render();
+    });
+    savedExpression.className = "history-expression";
+    savedExpression.textContent = item.expression;
+    savedResult.className = "history-result";
+    savedResult.textContent = `= ${formatResult(item.result)}`;
+    restoreButton.append(savedExpression, savedResult);
+    historyItem.append(restoreButton);
+    historyListEl.append(historyItem);
+  });
+  clearHistoryButton.disabled = history.length === 0;
+}
+
+function clearHistory() {
+  history = [];
+  saveHistory();
+  renderHistory();
 }
 
 function formatResult(value) {
@@ -126,3 +206,6 @@ document.addEventListener("keydown", (event) => {
     clearAll();
   }
 });
+
+clearHistoryButton.addEventListener("click", clearHistory);
+renderHistory();
